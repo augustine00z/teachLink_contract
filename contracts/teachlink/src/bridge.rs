@@ -805,28 +805,28 @@ mod tests {
     }
 }
 
-    #[test]
-    fn mark_bridge_failed_records_failure_and_stores_reason() {
-        let env = Env::default();
-        let contract_id = env.register(TeachLinkBridge, ());
-        let reason = Bytes::from_slice(&env, b"simulated_failure");
+#[test]
+fn mark_bridge_failed_records_failure_and_stores_reason() {
+    let env = Env::default();
+    let contract_id = env.register(TeachLinkBridge, ());
+    let reason = Bytes::from_slice(&env, b"simulated_failure");
 
-        // Seed a bridge tx so the failure can be recorded
-        env.as_contract(&contract_id, || {
-            seed_bridge_tx(&env, 42, 1_000);
-        });
+    // Seed a bridge tx so the failure can be recorded
+    env.as_contract(&contract_id, || {
+        seed_bridge_tx(&env, 42, 1_000);
+    });
 
-        env.as_contract(&contract_id, || {
-            let r = Bridge::mark_bridge_failed(&env, 42, reason.clone());
-            assert_eq!(r, Ok(()));
-        });
+    env.as_contract(&contract_id, || {
+        let r = Bridge::mark_bridge_failed(&env, 42, reason.clone());
+        assert_eq!(r, Ok(()));
+    });
 
-        let failures: Map<u64, Bytes> = env
-            .storage()
-            .instance()
-            .get(&BRIDGE_FAILURES)
-            .unwrap_or_else(|| Map::new(&env));
-        let stored = failures.get(42);
-        assert!(stored.is_some());
-        assert_eq!(stored.unwrap(), reason);
-    }
+    let failures: Map<u64, Bytes> = env
+        .storage()
+        .instance()
+        .get(&BRIDGE_FAILURES)
+        .unwrap_or_else(|| Map::new(&env));
+    let stored = failures.get(42);
+    assert!(stored.is_some());
+    assert_eq!(stored.unwrap(), reason);
+}
